@@ -1,0 +1,441 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Data Mapper is a browser-based visual mapping tool for transforming source JSON or XML data into target JSON structures."
+    />
+    <title>Data Mapper | Visual JSON/XML Mapping Tool</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="hero" aria-labelledby="pageTitle">
+        <span class="hero-badge">Agentic Engineering Developer Tool</span>
+        <h1 id="pageTitle">Data Mapper</h1>
+        <p>
+          Visually connect source JSON or XML fields to a target JSON template,
+          preview the transformed output, and export reusable mapping rules.
+        </p>
+        <div class="hero-actions" aria-label="Primary actions">
+          <button class="btn btn-primary" id="parseDataButton" type="button">
+            Parse Data
+          </button>
+          <button
+            class="btn btn-outline-info"
+            id="loadSampleButton"
+            type="button"
+          >
+            Load Sample Mapping
+          </button>
+          <button class="btn btn-outline-light" id="clearButton" type="button">
+            Clear
+          </button>
+        </div>
+      </section>
+
+      <section class="panel mb-4" aria-labelledby="statusTitle">
+        <div class="panel-inner">
+          <div class="section-title">
+            <div>
+              <h2 id="statusTitle">Workspace Status</h2>
+              <p>
+                Validation results, mapping feedback, and export messages appear
+                here.
+              </p>
+            </div>
+          </div>
+          <div
+            class="status-area info"
+            id="statusMessage"
+            role="status"
+            aria-live="polite"
+          >
+            Ready. Paste source data and a target JSON template, or load the
+            sample mapping.
+          </div>
+        </div>
+      </section>
+
+      <section class="panel mb-4" aria-labelledby="statsTitle">
+        <div class="panel-inner">
+          <div class="section-title">
+            <div>
+              <h2 id="statsTitle">Mapping Stats</h2>
+              <p>
+                Track extracted fields, active mappings, and generated output
+                size.
+              </p>
+            </div>
+          </div>
+          <div class="stats-grid">
+            <div class="stat-pill">
+              <span>Source Fields</span>
+              <strong id="sourceFieldsCount">0</strong>
+            </div>
+            <div class="stat-pill">
+              <span>Target Fields</span>
+              <strong id="targetFieldsCount">0</strong>
+            </div>
+            <div class="stat-pill">
+              <span>Active Mappings</span>
+              <strong id="activeMappingsCount">0</strong>
+            </div>
+            <div class="stat-pill">
+              <span>Unmapped Targets</span>
+              <strong id="unmappedTargetsCount">0</strong>
+            </div>
+            <div class="stat-pill">
+              <span>Output Size</span>
+              <strong id="outputSizeCount">0 B</strong>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="row g-4 mb-4" aria-label="Data input editors">
+        <div class="col-lg-6">
+          <section class="panel h-100" aria-labelledby="sourceInputTitle">
+            <div class="panel-inner">
+              <div class="section-title">
+                <div>
+                  <h2 id="sourceInputTitle">Source Data</h2>
+                  <p>
+                    Paste JSON or XML data to extract mappable source fields.
+                  </p>
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label" for="sourceTypeSelect"
+                  >Source Type</label
+                >
+                <select class="form-select" id="sourceTypeSelect">
+                  <option value="auto" selected>Auto Detect</option>
+                  <option value="json">JSON</option>
+                  <option value="xml">XML</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="form-label" for="sourceTextarea"
+                  >Source JSON/XML</label
+                >
+                <textarea
+                  class="form-control"
+                  id="sourceTextarea"
+                  spellcheck="false"
+                  placeholder="Paste source JSON or XML here"
+                ></textarea>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <div class="col-lg-6">
+          <section class="panel h-100" aria-labelledby="targetInputTitle">
+            <div class="panel-inner">
+              <div class="section-title">
+                <div>
+                  <h2 id="targetInputTitle">Target Template</h2>
+                  <p>
+                    Paste the target JSON structure that mapped values should
+                    fill.
+                  </p>
+                </div>
+              </div>
+
+              <div>
+                <label class="form-label" for="targetTextarea"
+                  >Target JSON Template</label
+                >
+                <textarea
+                  class="form-control"
+                  id="targetTextarea"
+                  spellcheck="false"
+                  placeholder="Paste target JSON template here"
+                ></textarea>
+              </div>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <section class="panel mb-4" aria-labelledby="fileImportTitle">
+        <div class="panel-inner">
+          <div class="section-title">
+            <div>
+              <h2 id="fileImportTitle">File Import</h2>
+              <p>
+                Import source JSON/XML files and target JSON template files.
+              </p>
+            </div>
+          </div>
+
+          <div class="import-grid">
+            <div>
+              <label class="form-label" for="sourceFileInput"
+                >Source File</label
+              >
+              <input
+                class="form-control"
+                id="sourceFileInput"
+                type="file"
+                accept=".json,.xml,application/json,text/xml,application/xml"
+              />
+            </div>
+            <div>
+              <label class="form-label" for="targetFileInput"
+                >Target Template File</label
+              >
+              <input
+                class="form-control"
+                id="targetFileInput"
+                type="file"
+                accept=".json,application/json"
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel mb-4" aria-labelledby="workspaceTitle">
+        <div class="panel-inner">
+          <div class="section-title">
+            <div>
+              <h2 id="workspaceTitle">Visual Mapping Workspace</h2>
+              <p>
+                Select a source field, then click or drop onto a target field to
+                create a mapping.
+              </p>
+            </div>
+            <div class="utility-row">
+              <button
+                class="btn btn-outline-info"
+                id="autoMapButton"
+                type="button"
+              >
+                Auto Map Similar Names
+              </button>
+              <button
+                class="btn btn-success"
+                id="generateOutputButton"
+                type="button"
+              >
+                Generate Output
+              </button>
+            </div>
+          </div>
+
+          <div class="workspace" id="mappingWorkspace">
+            <section class="field-panel" aria-labelledby="sourceFieldsTitle">
+              <div class="field-panel-header">
+                <h3 id="sourceFieldsTitle">Source Fields</h3>
+                <span class="mapping-badge" id="sourceFieldsBadge"
+                  >0 fields</span
+                >
+              </div>
+              <div class="field-list" id="sourceFieldsList">
+                <div class="empty-state">Parse source data to view fields.</div>
+              </div>
+            </section>
+
+            <section class="mapping-canvas" aria-label="SVG connection layer">
+              <svg
+                class="connection-svg"
+                id="connectionSvg"
+                aria-hidden="true"
+              ></svg>
+              <div class="canvas-empty" id="canvasEmptyState">
+                Connections render here after mappings are created.
+              </div>
+            </section>
+
+            <section class="field-panel" aria-labelledby="targetFieldsTitle">
+              <div class="field-panel-header">
+                <h3 id="targetFieldsTitle">Target Fields</h3>
+                <span class="mapping-badge" id="targetFieldsBadge"
+                  >0 fields</span
+                >
+              </div>
+              <div class="field-list" id="targetFieldsList">
+                <div class="empty-state">
+                  Parse target template to view fields.
+                </div>
+              </div>
+            </section>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel mb-4" aria-labelledby="rulesTitle">
+        <div class="panel-inner">
+          <div class="section-title">
+            <div>
+              <h2 id="rulesTitle">Mapping Rules</h2>
+              <p>Review active source-to-target field connections.</p>
+            </div>
+            <div class="utility-row">
+              <button
+                class="btn btn-outline-info"
+                id="saveRulesButton"
+                type="button"
+              >
+                Save Mapping Rules
+              </button>
+              <button
+                class="btn btn-outline-light"
+                id="exportRulesButton"
+                type="button"
+              >
+                Export Mapping Rules
+              </button>
+              <label class="btn btn-outline-light mb-0" for="importRulesInput"
+                >Import Mapping Rules</label
+              >
+              <input
+                class="d-none"
+                id="importRulesInput"
+                type="file"
+                accept=".json,application/json"
+              />
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table class="table align-middle" aria-describedby="rulesTitle">
+              <thead>
+                <tr>
+                  <th scope="col">Source Path</th>
+                  <th scope="col">Target Path</th>
+                  <th scope="col">Source Type</th>
+                  <th scope="col">Remove</th>
+                </tr>
+              </thead>
+              <tbody id="mappingRulesTableBody">
+                <tr>
+                  <td colspan="4">
+                    <div class="empty-state">No active mappings yet.</div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section
+        class="row g-4 mb-4"
+        aria-label="Output and saved mapping panels"
+      >
+        <div class="col-lg-7">
+          <section class="panel h-100" aria-labelledby="outputTitle">
+            <div class="panel-inner">
+              <div class="section-title">
+                <div>
+                  <h2 id="outputTitle">Output Preview</h2>
+                  <p>
+                    Generated target JSON appears here after mapping rules are
+                    applied.
+                  </p>
+                </div>
+                <div class="utility-row">
+                  <button
+                    class="btn btn-outline-info"
+                    id="copyOutputButton"
+                    type="button"
+                  >
+                    Copy Output JSON
+                  </button>
+                  <button
+                    class="btn btn-outline-light"
+                    id="downloadOutputButton"
+                    type="button"
+                  >
+                    Download Output JSON
+                  </button>
+                </div>
+              </div>
+
+              <pre class="output-preview" id="outputPreview">
+No output generated yet.</pre
+              >
+            </div>
+          </section>
+        </div>
+
+        <div class="col-lg-5">
+          <section class="panel h-100" aria-labelledby="savedMappingsTitle">
+            <div class="panel-inner">
+              <div class="section-title">
+                <div>
+                  <h2 id="savedMappingsTitle">Saved Mappings</h2>
+                  <p>Load or delete mapping rule sets saved in this browser.</p>
+                </div>
+              </div>
+
+              <div class="saved-list" id="savedMappingsList">
+                <div class="empty-state">No saved mapping rules yet.</div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <section class="panel" aria-labelledby="exportTitle">
+        <div class="panel-inner">
+          <div class="section-title">
+            <div>
+              <h2 id="exportTitle">Export Workflow</h2>
+              <p>
+                Use generated output and exported mapping rules in downstream
+                developer workflows.
+              </p>
+            </div>
+          </div>
+
+          <div class="utility-row">
+            <button
+              class="btn btn-primary"
+              id="generateOutputButtonBottom"
+              type="button"
+            >
+              Generate Output
+            </button>
+            <button
+              class="btn btn-outline-info"
+              id="copyOutputButtonBottom"
+              type="button"
+            >
+              Copy Output JSON
+            </button>
+            <button
+              class="btn btn-outline-light"
+              id="downloadOutputButtonBottom"
+              type="button"
+            >
+              Download Output JSON
+            </button>
+            <button
+              class="btn btn-outline-light"
+              id="exportRulesButtonBottom"
+              type="button"
+            >
+              Export Mapping Rules
+            </button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="script.js"></script>
+  </body>
+</html>
